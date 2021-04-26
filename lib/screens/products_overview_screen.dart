@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/data/dummy_data.dart';
 import 'package:fshop/models/product.dart';
+import 'package:fshop/widgets/product_item_widget.dart';
 
 class ProductsOverviewScreen extends StatelessWidget {
   final List<Product> loadedProducts = dummyProducts;
@@ -20,8 +21,8 @@ class ProductsOverviewScreen extends StatelessWidget {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
-        itemBuilder: (ctx, i) => Text(
-          loadedProducts[i].title,
+        itemBuilder: (ctx, i) => ProductItemWidget(
+          product: loadedProducts[i],
         ),
       ),
     );
