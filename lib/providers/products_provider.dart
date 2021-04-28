@@ -14,4 +14,10 @@ class ProductsProvider with ChangeNotifier {
     _items.add(product);
     notifyListeners();
   }
+
+  void toggleFavoriteById(int id) {
+    final product = _items.firstWhere((product) => product.id == id);
+    product.isFavorite = !product.isFavorite;
+    notifyListeners();
+  }
 }
