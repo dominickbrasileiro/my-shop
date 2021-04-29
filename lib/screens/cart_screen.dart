@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/providers/cart_provider.dart';
+import 'package:fshop/widgets/cart_item_widget.dart';
 import 'package:provider/provider.dart';
 
 class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
+    final cartItems = cartProvider.items.values.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -45,9 +47,17 @@ class CartScreen extends StatelessWidget {
                         Theme.of(context).primaryColor,
                       ),
                     ),
-                    child: Text('COMPRAR'),
+                    child: Text('CHECKOUT'),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: cartProvider.itemCount,
+              itemBuilder: (ctx, i) => CartItemWidget(
+                cartItem: cartItems[i],
               ),
             ),
           ),
