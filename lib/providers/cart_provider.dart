@@ -25,6 +25,7 @@ class CartProvider with ChangeNotifier {
         product.id,
         (existingProduct) => CartItem(
           id: existingProduct.id,
+          productId: product.id,
           title: existingProduct.title,
           quantity: existingProduct.quantity + 1,
           price: existingProduct.price,
@@ -35,6 +36,7 @@ class CartProvider with ChangeNotifier {
         product.id,
         () => CartItem(
           id: product.id,
+          productId: product.id,
           title: product.title,
           price: product.price,
           quantity: 1,
@@ -42,6 +44,11 @@ class CartProvider with ChangeNotifier {
       );
     }
 
+    notifyListeners();
+  }
+
+  void removeItem(int productId) {
+    _items.remove(productId);
     notifyListeners();
   }
 }
