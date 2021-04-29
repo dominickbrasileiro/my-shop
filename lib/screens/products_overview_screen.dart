@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fshop/core/app_routes.dart';
 import 'package:fshop/providers/cart_provider.dart';
 import 'package:fshop/providers/products_provider.dart';
+import 'package:fshop/widgets/app_drawer.dart';
 import 'package:fshop/widgets/badge_widget.dart';
 import 'package:fshop/widgets/product_grid.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     final productsProvider = Provider.of<ProductsProvider>(context);
 
     return Scaffold(
+      drawer: AppDrawer(),
       appBar: AppBar(
         title: Text('MyShop'),
         actions: [
