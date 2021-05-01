@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/models/product.dart';
-import 'package:fshop/widgets/product_item_widget.dart';
-import 'package:provider/provider.dart';
+import 'package:fshop/widgets/product_grid_item_widget.dart';
 
 class ProductGrid extends StatelessWidget {
   final List<Product> products;
@@ -21,7 +20,7 @@ class ProductGrid extends StatelessWidget {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemBuilder: (ctx, i) => ProductItemWidget(product: products[i]),
+      itemBuilder: (ctx, i) => ProductGridItemWidget(product: products[i]),
     );
   }
 }

@@ -5,10 +5,10 @@ import 'package:fshop/providers/cart_provider.dart';
 import 'package:fshop/providers/products_provider.dart';
 import 'package:provider/provider.dart';
 
-class ProductItemWidget extends StatelessWidget {
+class ProductGridItemWidget extends StatelessWidget {
   final Product product;
 
-  ProductItemWidget({
+  ProductGridItemWidget({
     required this.product,
   });
 
