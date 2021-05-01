@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fshop/core/app_routes.dart';
 import 'package:fshop/providers/products_provider.dart';
 import 'package:fshop/widgets/app_drawer.dart';
 import 'package:fshop/widgets/manage_product_item_widget.dart';
@@ -16,7 +17,9 @@ class ManageProductsScreen extends StatelessWidget {
         title: Text('Manage Products'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(AppRoutes.PRODUCT_FORM);
+            },
             icon: Icon(Icons.add),
           ),
         ],
