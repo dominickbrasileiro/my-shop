@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:fshop/models/product.dart';
 
 class ProductFormScreen extends StatefulWidget {
   @override
@@ -10,6 +13,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   late FocusNode _descriptionFocusNode;
   late FocusNode _imageUrlFocusNode;
   late TextEditingController _imageUrlController;
+  final _formKey = GlobalKey<FormState>();
+
+  final _formData = Map<String, Object?>();
 
   @override
   void initState() {
@@ -36,15 +42,36 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     setState(() {});
   }
 
+  void _saveForm() {
+    _formKey.currentState!.save();
+
+    final newProduct = Product(
+      id: Random().nextInt(33),
+      title: _formData['title'] as String,
+      price: _formData['price'] as double,
+      description: _formData['description'] as String,
+      imageUrl: _formData['imageUrl'] as String,
+    );
+
+    print(newProduct);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Product Form'),
+        actions: [
+          IconButton(
+            onPressed: _saveForm,
+            icon: Icon(Icons.save),
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Form(
+          key: _formKey,
           child: ListView(
             children: [
               TextFormField(
@@ -52,6 +79,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 decoration: InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _priceFocusNode.requestFocus(),
+                onSaved: (value) => _formData['title'] = value,
               ),
               TextFormField(
                 focusNode: _priceFocusNode,
@@ -59,12 +87,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
+                onSaved: (value) => _formData['price'] =
+                    value != null && value.isNotEmpty
+                        ? double.parse(value)
+                        : null,
               ),
               TextFormField(
                 focusNode: _descriptionFocusNode,
                 decoration: InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
+                onSaved: (value) => _formData['description'] = value,
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -76,6 +109,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       decoration: InputDecoration(labelText: 'Image URL'),
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _saveForm(),
+                      onSaved: (value) => _formData['imageUrl'] = value,
                     ),
                   ),
                   Container(
