@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:fshop/models/cart_item.dart';
 import 'package:fshop/models/order.dart';

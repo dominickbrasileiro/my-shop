@@ -1,7 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:fshop/models/product.dart';
+import 'package:fshop/models/partial_product.dart';
+import 'package:fshop/providers/products_provider.dart';
+import 'package:provider/provider.dart';
 
 class ProductFormScreen extends StatefulWidget {
   @override
@@ -65,15 +65,18 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
     _formKey.currentState!.save();
 
-    final newProduct = Product(
-      id: Random().nextInt(33),
+    final newProduct = PartialProduct(
       title: _formData['title'] as String,
       price: _formData['price'] as double,
       description: _formData['description'] as String,
       imageUrl: _formData['imageUrl'] as String,
     );
 
-    print(newProduct);
+    final productsProvider =
+        Provider.of<ProductsProvider>(context, listen: false);
+
+    productsProvider.addProduct(newProduct);
+    Navigator.of(context).pop();
   }
 
   @override

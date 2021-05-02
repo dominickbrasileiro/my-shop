@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/data/dummy_data.dart';
+import 'package:fshop/models/partial_product.dart';
 import 'package:fshop/models/product.dart';
 
 class ProductsProvider with ChangeNotifier {
@@ -12,8 +13,18 @@ class ProductsProvider with ChangeNotifier {
   List<Product> get favoriteProducts =>
       _items.where((product) => product.isFavorite).toList();
 
-  void addProduct(Product product) {
+  void addProduct(PartialProduct partialProduct) {
+    final product = Product(
+      id: _items.length + 1,
+      title: partialProduct.title,
+      price: partialProduct.price,
+      description: partialProduct.description,
+      imageUrl: partialProduct.imageUrl,
+      isFavorite: partialProduct.isFavorite,
+    );
+
     _items.add(product);
+
     notifyListeners();
   }
 
