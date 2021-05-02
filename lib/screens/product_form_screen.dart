@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/models/partial_product.dart';
+import 'package:fshop/models/product.dart';
 import 'package:fshop/providers/products_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +27,31 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _imageUrlFocusNode = FocusNode();
     _imageUrlFocusNode.addListener(handleImageUrlFocusChange);
     _imageUrlController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_formData.isEmpty) {
+      final arguments = ModalRoute.of(context)!.settings.arguments;
+
+      if (arguments == null) {
+        return;
+      }
+
+      assert(arguments.runtimeType == Product);
+
+      final Product product = arguments as Product;
+
+      _formData['id'] = product.id;
+      _formData['title'] = product.title.toString();
+      _formData['price'] = product.price.toString();
+      _formData['description'] = product.description.toString();
+      _formData['imageUrl'] = product.imageUrl.toString();
+
+      _imageUrlController.text = product.imageUrl.toString();
+    }
   }
 
   @override
@@ -65,17 +91,28 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
     _formKey.currentState!.save();
 
-    final newProduct = PartialProduct(
-      title: _formData['title'] as String,
-      price: _formData['price'] as double,
-      description: _formData['description'] as String,
-      imageUrl: _formData['imageUrl'] as String,
-    );
-
     final productsProvider =
         Provider.of<ProductsProvider>(context, listen: false);
 
-    productsProvider.addProduct(newProduct);
+    print(_formData);
+
+    if (_formData['id'] == null) {
+      productsProvider.addProduct(PartialProduct(
+        title: _formData['title'] as String,
+        price: _formData['price'] as double,
+        description: _formData['description'] as String,
+        imageUrl: _formData['imageUrl'] as String,
+      ));
+    } else {
+      productsProvider.updateProduct(Product(
+        id: _formData['id'] as int,
+        title: _formData['title'] as String,
+        price: _formData['price'] as double,
+        description: _formData['description'] as String,
+        imageUrl: _formData['imageUrl'] as String,
+      ));
+    }
+
     Navigator.of(context).pop();
   }
 
@@ -98,7 +135,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           child: ListView(
             children: [
               TextFormField(
-                autofocus: true,
+                initialValue: _formData['title'] as String?,
                 decoration: InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _priceFocusNode.requestFocus(),
@@ -117,6 +154,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               TextFormField(
                 focusNode: _priceFocusNode,
+                initialValue: _formData['price'] as String?,
                 decoration: InputDecoration(labelText: 'Price'),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -144,6 +182,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               TextFormField(
                 focusNode: _descriptionFocusNode,
+                initialValue: _formData['description'] as String?,
                 decoration: InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,

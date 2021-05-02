@@ -28,6 +28,18 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateProduct(Product product) {
+    final productIndex =
+        _items.indexWhere((_product) => _product.id == product.id);
+
+    if (productIndex < 0) {
+      return;
+    }
+
+    _items[productIndex] = product;
+    notifyListeners();
+  }
+
   void toggleFavoriteById(int id) {
     final product = _items.firstWhere((product) => product.id == id);
     product.isFavorite = !product.isFavorite;
