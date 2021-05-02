@@ -39,10 +39,30 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   void handleImageUrlFocusChange() {
-    setState(() {});
+    if (validateUrl(_imageUrlController.text)) {
+      setState(() {});
+    }
+  }
+
+  bool validateUrl(String url) {
+    final bool startsWithHttp = url.toLowerCase().startsWith('http://');
+    final bool startsWithHttps = url.toLowerCase().startsWith('https://');
+
+    final bool endsWithPng = url.toLowerCase().endsWith('.png');
+    final bool endsWithJpg = url.toLowerCase().endsWith('.jpg');
+    final bool endsWithJpeg = url.toLowerCase().endsWith('.jpeg');
+
+    return (startsWithHttp || startsWithHttps) &&
+        (endsWithPng || endsWithJpg || endsWithJpeg);
   }
 
   void _saveForm() {
+    final bool isValid = _formKey.currentState!.validate();
+
+    if (!isValid) {
+      return;
+    }
+
     _formKey.currentState!.save();
 
     final newProduct = Product(
@@ -80,6 +100,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) => _priceFocusNode.requestFocus(),
                 onSaved: (value) => _formData['title'] = value,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Title is required';
+                  }
+
+                  if (value.trim().length < 3) {
+                    return 'Title must contain 3 characters at least';
+                  }
+
+                  return null;
+                },
               ),
               TextFormField(
                 focusNode: _priceFocusNode,
@@ -87,10 +118,26 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
-                onSaved: (value) => _formData['price'] =
-                    value != null && value.isNotEmpty
-                        ? double.parse(value)
-                        : null,
+                onSaved: (value) {
+                  _formData['price'] = value != null && value.isNotEmpty
+                      ? double.parse(value)
+                      : null;
+                },
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Price is required';
+                  }
+
+                  final double? parsedPrice = double.tryParse(value);
+
+                  if (parsedPrice == null) {
+                    return 'Invalid format';
+                  }
+
+                  if (parsedPrice <= 0) {
+                    return 'Price must be greater than 0';
+                  }
+                },
               ),
               TextFormField(
                 focusNode: _descriptionFocusNode,
@@ -98,6 +145,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 onSaved: (value) => _formData['description'] = value,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Description is required';
+                  }
+                },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -111,6 +163,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _saveForm(),
                       onSaved: (value) => _formData['imageUrl'] = value,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Image URL is required';
+                        }
+
+                        if (!validateUrl(value)) {
+                          return 'Invalid format';
+                        }
+                      },
                     ),
                   ),
                   Container(
