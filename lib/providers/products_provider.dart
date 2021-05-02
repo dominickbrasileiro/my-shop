@@ -40,6 +40,15 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteProduct(int id) {
+    final index = _items.indexWhere((product) => product.id == id);
+
+    if (index >= 0) {
+      _items.removeWhere((product) => product.id == id);
+      notifyListeners();
+    }
+  }
+
   void toggleFavoriteById(int id) {
     final product = _items.firstWhere((product) => product.id == id);
     product.isFavorite = !product.isFavorite;

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/core/app_routes.dart';
 import 'package:fshop/models/product.dart';
+import 'package:fshop/providers/products_provider.dart';
+import 'package:provider/provider.dart';
 
 class ManageProductItemWidget extends StatelessWidget {
   final Product product;
@@ -31,7 +33,36 @@ class ManageProductItemWidget extends StatelessWidget {
               icon: Icon(Icons.edit),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () async {
+                final userConfirms = await showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('Are you sure?'),
+                    content: Text('Do you want to delete "${product.title}"?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop(false);
+                        },
+                        child: Text('No'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop(true);
+                        },
+                        child: Text('Yes'),
+                      )
+                    ],
+                  ),
+                );
+
+                if (userConfirms) {
+                  final productsProvider =
+                      Provider.of<ProductsProvider>(context, listen: false);
+
+                  productsProvider.deleteProduct(product.id);
+                }
+              },
               color: Theme.of(context).errorColor,
               icon: Icon(Icons.delete),
             ),
