@@ -24,13 +24,15 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<ProductsProvider>(context, listen: false)
-        .fetchProducts()
-        .then((_) {
+    _fetchProducts().then((_) {
       setState(() {
         _isLoading = false;
       });
     });
+  }
+
+  Future<void> _fetchProducts() async {
+    await Provider.of<ProductsProvider>(context, listen: false).fetchProducts();
   }
 
   @override
@@ -77,10 +79,13 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : ProductGrid(
-              products: _showFavoritesOnly
-                  ? productsProvider.favoriteProducts
-                  : productsProvider.products,
+          : RefreshIndicator(
+              onRefresh: _fetchProducts,
+              child: ProductGrid(
+                products: _showFavoritesOnly
+                    ? productsProvider.favoriteProducts
+                    : productsProvider.products,
+              ),
             ),
     );
   }
