@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fshop/models/cart_item.dart';
 import 'package:fshop/models/order.dart';
@@ -11,7 +13,7 @@ class OrdersProvider with ChangeNotifier {
 
   void addOrder(List<CartItem> items, double amount) {
     _items.add(Order(
-      id: _items.length + 1,
+      id: Random().nextInt(33).toString(),
       amount: amount,
       items: items,
       date: DateTime.now(),

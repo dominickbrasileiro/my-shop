@@ -3,9 +3,9 @@ import 'package:fshop/models/cart_item.dart';
 import 'package:fshop/models/product.dart';
 
 class CartProvider with ChangeNotifier {
-  Map<int, CartItem> _items = {};
+  Map<String, CartItem> _items = {};
 
-  Map<int, CartItem> get items => {..._items};
+  Map<String, CartItem> get items => {..._items};
 
   int get itemCount => _items.length;
 
@@ -47,7 +47,7 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeSingleItem(int productId) {
+  void removeSingleItem(String productId) {
     if (!_items.containsKey(productId)) {
       return;
     }
@@ -70,7 +70,7 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeItem(int productId) {
+  void removeItem(String productId) {
     _items.remove(productId);
     notifyListeners();
   }

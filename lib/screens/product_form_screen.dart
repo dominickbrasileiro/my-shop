@@ -16,6 +16,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   late TextEditingController _imageUrlController;
   final _formKey = GlobalKey<FormState>();
 
+  bool _isLoading = false;
   final _formData = Map<String, Object?>();
 
   @override
@@ -82,22 +83,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         (endsWithPng || endsWithJpg || endsWithJpeg);
   }
 
-  void _saveForm() {
+  void _saveForm() async {
     final bool isValid = _formKey.currentState!.validate();
 
     if (!isValid) {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     _formKey.currentState!.save();
 
     final productsProvider =
         Provider.of<ProductsProvider>(context, listen: false);
 
-    print(_formData);
-
     if (_formData['id'] == null) {
-      productsProvider.addProduct(PartialProduct(
+      await productsProvider.addProduct(PartialProduct(
         title: _formData['title'] as String,
         price: _formData['price'] as double,
         description: _formData['description'] as String,
@@ -105,13 +108,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       ));
     } else {
       productsProvider.updateProduct(Product(
-        id: _formData['id'] as int,
+        id: _formData['id'] as String,
         title: _formData['title'] as String,
         price: _formData['price'] as double,
         description: _formData['description'] as String,
         imageUrl: _formData['imageUrl'] as String,
       ));
     }
+
+    setState(() {
+      _isLoading = false;
+    });
 
     Navigator.of(context).pop();
   }
@@ -128,121 +135,127 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: _formData['title'] as String?,
-                decoration: InputDecoration(labelText: 'Title'),
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => _priceFocusNode.requestFocus(),
-                onSaved: (value) => _formData['title'] = value,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Title is required';
-                  }
-
-                  if (value.trim().length < 3) {
-                    return 'Title must contain 3 characters at least';
-                  }
-
-                  return null;
-                },
-              ),
-              TextFormField(
-                focusNode: _priceFocusNode,
-                initialValue: _formData['price'] as String?,
-                decoration: InputDecoration(labelText: 'Price'),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                onFieldSubmitted: (_) => _descriptionFocusNode.requestFocus(),
-                onSaved: (value) {
-                  _formData['price'] = value != null && value.isNotEmpty
-                      ? double.parse(value)
-                      : null;
-                },
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Price is required';
-                  }
-
-                  final double? parsedPrice = double.tryParse(value);
-
-                  if (parsedPrice == null) {
-                    return 'Invalid format';
-                  }
-
-                  if (parsedPrice <= 0) {
-                    return 'Price must be greater than 0';
-                  }
-                },
-              ),
-              TextFormField(
-                focusNode: _descriptionFocusNode,
-                initialValue: _formData['description'] as String?,
-                decoration: InputDecoration(labelText: 'Description'),
-                maxLines: 3,
-                keyboardType: TextInputType.multiline,
-                onSaved: (value) => _formData['description'] = value,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Description is required';
-                  }
-                },
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      focusNode: _imageUrlFocusNode,
-                      controller: _imageUrlController,
-                      decoration: InputDecoration(labelText: 'Image URL'),
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _saveForm(),
-                      onSaved: (value) => _formData['imageUrl'] = value,
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Padding(
+              padding: EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    TextFormField(
+                      initialValue: _formData['title'] as String?,
+                      decoration: InputDecoration(labelText: 'Title'),
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) => _priceFocusNode.requestFocus(),
+                      onSaved: (value) => _formData['title'] = value,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Image URL is required';
+                          return 'Title is required';
                         }
 
-                        if (!validateUrl(value)) {
+                        if (value.trim().length < 3) {
+                          return 'Title must contain 3 characters at least';
+                        }
+
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      focusNode: _priceFocusNode,
+                      initialValue: _formData['price'] as String?,
+                      decoration: InputDecoration(labelText: 'Price'),
+                      textInputAction: TextInputAction.next,
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      onFieldSubmitted: (_) =>
+                          _descriptionFocusNode.requestFocus(),
+                      onSaved: (value) {
+                        _formData['price'] = value != null && value.isNotEmpty
+                            ? double.parse(value)
+                            : null;
+                      },
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Price is required';
+                        }
+
+                        final double? parsedPrice = double.tryParse(value);
+
+                        if (parsedPrice == null) {
                           return 'Invalid format';
+                        }
+
+                        if (parsedPrice <= 0) {
+                          return 'Price must be greater than 0';
                         }
                       },
                     ),
-                  ),
-                  Container(
-                    height: 100,
-                    width: 100,
-                    margin: EdgeInsets.only(
-                      top: 16,
-                      left: 16,
+                    TextFormField(
+                      focusNode: _descriptionFocusNode,
+                      initialValue: _formData['description'] as String?,
+                      decoration: InputDecoration(labelText: 'Description'),
+                      maxLines: 3,
+                      keyboardType: TextInputType.multiline,
+                      onSaved: (value) => _formData['description'] = value,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Description is required';
+                        }
+                      },
                     ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    alignment: Alignment.center,
-                    child: _imageUrlController.text.isEmpty
-                        ? Text(
-                            'Enter Image URL',
-                            textAlign: TextAlign.center,
-                          )
-                        : Image.network(
-                            _imageUrlController.text,
-                            fit: BoxFit.cover,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            focusNode: _imageUrlFocusNode,
+                            controller: _imageUrlController,
+                            decoration: InputDecoration(labelText: 'Image URL'),
+                            keyboardType: TextInputType.url,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _saveForm(),
+                            onSaved: (value) => _formData['imageUrl'] = value,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Image URL is required';
+                              }
+
+                              if (!validateUrl(value)) {
+                                return 'Invalid format';
+                              }
+                            },
                           ),
-                  ),
-                ],
+                        ),
+                        Container(
+                          height: 100,
+                          width: 100,
+                          margin: EdgeInsets.only(
+                            top: 16,
+                            left: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          alignment: Alignment.center,
+                          child: _imageUrlController.text.isEmpty
+                              ? Text(
+                                  'Enter Image URL',
+                                  textAlign: TextAlign.center,
+                                )
+                              : Image.network(
+                                  _imageUrlController.text,
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

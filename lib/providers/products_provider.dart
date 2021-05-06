@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fshop/data/dummy_data.dart';
 import 'package:fshop/models/partial_product.dart';
 import 'package:fshop/models/product.dart';
+import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
   List<Product> _items = dummyProducts;
@@ -13,17 +16,31 @@ class ProductsProvider with ChangeNotifier {
   List<Product> get favoriteProducts =>
       _items.where((product) => product.isFavorite).toList();
 
-  void addProduct(PartialProduct partialProduct) {
-    final product = Product(
-      id: _items.length + 1,
+  Future<void> addProduct(PartialProduct partialProduct) async {
+    final url = Uri.parse(
+        'https://my-shop-f01af-default-rtdb.firebaseio.com/products.json');
+
+    final response = await http.post(
+      url,
+      body: json.encode({
+        'title': partialProduct.title,
+        'description': partialProduct.description,
+        'price': partialProduct.price,
+        'imageUrl': partialProduct.imageUrl,
+        'isFavorite': partialProduct.isFavorite,
+      }),
+    );
+
+    final id = json.decode(response.body)['name'];
+
+    _items.add(Product(
+      id: id,
       title: partialProduct.title,
       price: partialProduct.price,
       description: partialProduct.description,
       imageUrl: partialProduct.imageUrl,
       isFavorite: partialProduct.isFavorite,
-    );
-
-    _items.add(product);
+    ));
 
     notifyListeners();
   }
@@ -40,7 +57,7 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteProduct(int id) {
+  void deleteProduct(String id) {
     final index = _items.indexWhere((product) => product.id == id);
 
     if (index >= 0) {
@@ -49,7 +66,7 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  void toggleFavoriteById(int id) {
+  void toggleFavoriteById(String id) {
     final product = _items.firstWhere((product) => product.id == id);
     product.isFavorite = !product.isFavorite;
     notifyListeners();
