@@ -1,28 +1,50 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:fshop/data/dummy_data.dart';
 import 'package:fshop/models/partial_product.dart';
 import 'package:fshop/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  List<Product> _items = dummyProducts;
+  final _url = Uri.parse(
+    'https://my-shop-f01af-default-rtdb.firebaseio.com/products.json',
+  );
+
+  List<Product> _items = [];
 
   List<Product> get products => [..._items];
 
   int get itemCount => _items.length;
 
+  Future<void> fetchProducts() async {
+    final response = await http.get(_url);
+
+    Map<String, dynamic>? data = json.decode(response.body);
+
+    if (data != null) {
+      _items.clear();
+
+      data.forEach((id, productData) {
+        _items.add(Product(
+          id: id,
+          title: productData['title'],
+          price: productData['price'],
+          description: productData['description'],
+          imageUrl: productData['imageUrl'],
+          isFavorite: productData['isFavorite'],
+        ));
+      });
+
+      notifyListeners();
+    }
+  }
+
   List<Product> get favoriteProducts =>
       _items.where((product) => product.isFavorite).toList();
 
   Future<void> addProduct(PartialProduct partialProduct) async {
-    final url = Uri.parse(
-      'https://my-shop-f01af-default-rtdb.firebaseio.com/products.json',
-    );
-
     final response = await http.post(
-      url,
+      _url,
       body: json.encode({
         'title': partialProduct.title,
         'description': partialProduct.description,
