@@ -56,7 +56,7 @@ class ManageProductItemWidget extends StatelessWidget {
                   ),
                 );
 
-                if (userConfirms) {
+                if (userConfirms != null && userConfirms) {
                   final productsProvider =
                       Provider.of<ProductsProvider>(context, listen: false);
 

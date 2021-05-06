@@ -47,7 +47,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
       _formData['id'] = product.id;
       _formData['title'] = product.title.toString();
-      _formData['price'] = product.price.toString();
+      _formData['price'] = product.price;
       _formData['description'] = product.description.toString();
       _formData['imageUrl'] = product.imageUrl.toString();
 
@@ -165,7 +165,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     ),
                     TextFormField(
                       focusNode: _priceFocusNode,
-                      initialValue: _formData['price'] as String?,
+                      initialValue: _formData['price'] != null
+                          ? _formData['price'].toString()
+                          : '',
                       decoration: InputDecoration(labelText: 'Price'),
                       textInputAction: TextInputAction.next,
                       keyboardType:
