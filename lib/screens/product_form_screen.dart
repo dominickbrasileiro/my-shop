@@ -126,13 +126,32 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         );
       }
     } else {
-      productsProvider.updateProduct(Product(
-        id: _formData['id'] as String,
-        title: _formData['title'] as String,
-        price: _formData['price'] as double,
-        description: _formData['description'] as String,
-        imageUrl: _formData['imageUrl'] as String,
-      ));
+      try {
+        await productsProvider.updateProduct(Product(
+          id: _formData['id'] as String,
+          title: _formData['title'] as String,
+          price: _formData['price'] as double,
+          description: _formData['description'] as String,
+          imageUrl: _formData['imageUrl'] as String,
+        ));
+      } catch (e) {
+        await showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('An error ocurred!'),
+            content:
+                Text('An unexpected error ocurred. Please try again later.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Ok'),
+              )
+            ],
+          ),
+        );
+      }
     }
 
     setState(() {
