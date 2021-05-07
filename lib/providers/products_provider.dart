@@ -117,9 +117,24 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  void toggleFavoriteById(String id) {
+  Future<void> toggleFavoriteById(String id) async {
     final product = _items.firstWhere((product) => product.id == id);
     product.isFavorite = !product.isFavorite;
     notifyListeners();
+
+    final url = Uri.parse('$_baseUrl/products/${product.id}.json');
+    final response = await http.patch(
+      url,
+      body: json.encode({
+        'isFavorite': product.isFavorite,
+      }),
+    );
+
+    if (response.statusCode >= 400) {
+      product.isFavorite = !product.isFavorite;
+      notifyListeners();
+
+      throw HttpException('An unexpected error ocurred.');
+    }
   }
 }
