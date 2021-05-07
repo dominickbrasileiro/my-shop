@@ -42,10 +42,10 @@ class ProductGridItemWidget extends StatelessWidget {
             onPressed: () async {
               try {
                 await productsProvider.toggleFavoriteById(product.id);
-              } on HttpException catch (e) {
+              } on HttpException {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('$e'),
+                    content: Text('An unexpected error ocurred.'),
                   ),
                 );
               }

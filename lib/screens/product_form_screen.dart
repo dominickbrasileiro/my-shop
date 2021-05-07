@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:fshop/core/exceptions/http_exception.dart';
 import 'package:fshop/models/partial_product.dart';
 import 'package:fshop/models/product.dart';
 import 'package:fshop/providers/products_provider.dart';
@@ -134,7 +137,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           description: _formData['description'] as String,
           imageUrl: _formData['imageUrl'] as String,
         ));
-      } catch (e) {
+      } on HttpException {
         await showDialog<Null>(
           context: context,
           builder: (ctx) => AlertDialog(

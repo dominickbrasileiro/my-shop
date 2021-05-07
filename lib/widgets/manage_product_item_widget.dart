@@ -65,9 +65,9 @@ class ManageProductItemWidget extends StatelessWidget {
 
                   try {
                     await productsProvider.deleteProduct(product.id);
-                  } on HttpException catch (e) {
+                  } on HttpException {
                     scaffoldMessenger.showSnackBar(SnackBar(
-                      content: Text('$e'),
+                      content: Text('An unexpected error ocurred.'),
                     ));
                   }
                 }

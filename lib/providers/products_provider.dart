@@ -89,7 +89,7 @@ class ProductsProvider with ChangeNotifier {
     );
 
     if (response.statusCode >= 400) {
-      throw new Error();
+      throw new HttpException();
     }
 
     _items[productIndex] = product;
@@ -112,7 +112,7 @@ class ProductsProvider with ChangeNotifier {
         _items.insert(index, product);
         notifyListeners();
 
-        throw HttpException('An unexpected error ocurred.');
+        throw HttpException();
       }
     }
   }
@@ -134,7 +134,7 @@ class ProductsProvider with ChangeNotifier {
       product.isFavorite = !product.isFavorite;
       notifyListeners();
 
-      throw HttpException('An unexpected error ocurred.');
+      throw HttpException();
     }
   }
 }
