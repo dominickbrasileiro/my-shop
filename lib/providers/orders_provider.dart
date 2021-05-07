@@ -1,22 +1,48 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fshop/models/cart_item.dart';
 import 'package:fshop/models/order.dart';
+import 'package:http/http.dart' as http;
 
 class OrdersProvider with ChangeNotifier {
+  final _baseUrl = 'https://my-shop-f01af-default-rtdb.firebaseio.com';
+
   List<Order> _items = [];
 
   List<Order> get orders => [..._items];
 
   int get itemCount => _items.length;
 
-  void addOrder(List<CartItem> items, double amount) {
+  Future<void> addOrder(List<CartItem> items, double amount) async {
+    final date = DateTime.now();
+
+    final url = Uri.parse('$_baseUrl/orders.json');
+    final response = await http.post(
+      url,
+      body: json.encode({
+        'amount': amount,
+        'date': date.toIso8601String(),
+        'items': items
+            .map((cartItem) => {
+                  'id': cartItem.id,
+                  'productId': cartItem.productId,
+                  'title': cartItem.title,
+                  'quantity': cartItem.quantity,
+                  'price': cartItem.price,
+                })
+            .toList(),
+      }),
+    );
+
+    final id = json.decode(response.body)['name'];
+
     _items.add(Order(
-      id: Random().nextInt(33).toString(),
+      id: id,
       amount: amount,
       items: items,
-      date: DateTime.now(),
+      date: date,
     ));
 
     notifyListeners();

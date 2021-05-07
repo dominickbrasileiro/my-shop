@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fshop/models/cart_item.dart';
 import 'package:fshop/providers/cart_provider.dart';
 import 'package:fshop/providers/orders_provider.dart';
 import 'package:fshop/widgets/cart_item_widget.dart';
@@ -43,20 +44,10 @@ class CartScreen extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      ordersProvider.addOrder(
-                        cartItems,
-                        cartProvider.totalAmount,
-                      );
-                      cartProvider.clear();
-                    },
-                    style: ButtonStyle(
-                      foregroundColor: MaterialStateProperty.all(
-                        Theme.of(context).primaryColor,
-                      ),
-                    ),
-                    child: Text('CHECKOUT'),
+                  CheckoutButton(
+                    cartProvider: cartProvider,
+                    ordersProvider: ordersProvider,
+                    cartItems: cartItems,
                   ),
                 ],
               ),
@@ -72,6 +63,61 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CheckoutButton extends StatefulWidget {
+  const CheckoutButton({
+    Key? key,
+    required this.cartProvider,
+    required this.ordersProvider,
+    required this.cartItems,
+  }) : super(key: key);
+
+  final CartProvider cartProvider;
+  final OrdersProvider ordersProvider;
+  final List<CartItem> cartItems;
+
+  @override
+  _CheckoutButtonState createState() => _CheckoutButtonState();
+}
+
+class _CheckoutButtonState extends State<CheckoutButton> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: widget.cartProvider.totalAmount == 0
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+
+              await widget.ordersProvider.addOrder(
+                widget.cartItems,
+                widget.cartProvider.totalAmount,
+              );
+              widget.cartProvider.clear();
+
+              setState(() {
+                _isLoading = false;
+              });
+            },
+      style: ButtonStyle(
+        foregroundColor: MaterialStateProperty.all(
+          Theme.of(context).primaryColor,
+        ),
+      ),
+      child: _isLoading
+          ? Container(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text('CHECKOUT'),
     );
   }
 }
