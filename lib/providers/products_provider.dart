@@ -77,7 +77,7 @@ class ProductsProvider with ChangeNotifier {
     }
 
     final url = Uri.parse('$_baseUrl/products/${product.id}.json');
-    await http.patch(
+    final response = await http.patch(
       url,
       body: json.encode({
         'title': product.title,
@@ -86,6 +86,10 @@ class ProductsProvider with ChangeNotifier {
         'imageUrl': product.imageUrl,
       }),
     );
+
+    if (response.statusCode >= 400) {
+      throw new Error();
+    }
 
     _items[productIndex] = product;
     notifyListeners();
