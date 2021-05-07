@@ -71,12 +71,14 @@ class OrdersProvider with ChangeNotifier {
 
     final id = json.decode(response.body)['name'];
 
-    _items.add(Order(
-      id: id,
-      amount: amount,
-      items: items,
-      date: date,
-    ));
+    _items.insert(
+        0,
+        Order(
+          id: id,
+          amount: amount,
+          items: items,
+          date: date,
+        ));
 
     notifyListeners();
   }
