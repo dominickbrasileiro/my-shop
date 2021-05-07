@@ -1,14 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fshop/core/app_constants.dart';
 import 'package:fshop/core/exceptions/http_exception.dart';
 import 'package:fshop/models/partial_product.dart';
 import 'package:fshop/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  final _baseUrl = 'https://my-shop-f01af-default-rtdb.firebaseio.com';
-
   List<Product> _items = [];
 
   List<Product> get products => [..._items];
@@ -16,7 +15,7 @@ class ProductsProvider with ChangeNotifier {
   int get itemCount => _items.length;
 
   Future<void> fetchProducts() async {
-    final url = Uri.parse('$_baseUrl/products.json');
+    final url = Uri.parse('${AppConstants.BASE_API_URL}/products.json');
     final response = await http.get(url);
 
     Map<String, dynamic>? data = json.decode(response.body);
@@ -43,7 +42,7 @@ class ProductsProvider with ChangeNotifier {
       _items.where((product) => product.isFavorite).toList();
 
   Future<void> addProduct(PartialProduct partialProduct) async {
-    final url = Uri.parse('$_baseUrl/products.json');
+    final url = Uri.parse('${AppConstants.BASE_API_URL}/products.json');
     final response = await http.post(
       url,
       body: json.encode({
@@ -77,7 +76,8 @@ class ProductsProvider with ChangeNotifier {
       return;
     }
 
-    final url = Uri.parse('$_baseUrl/products/${product.id}.json');
+    final url =
+        Uri.parse('${AppConstants.BASE_API_URL}/products/${product.id}.json');
     final response = await http.patch(
       url,
       body: json.encode({
@@ -105,7 +105,8 @@ class ProductsProvider with ChangeNotifier {
       _items.removeWhere((product) => product.id == id);
       notifyListeners();
 
-      final url = Uri.parse('$_baseUrl/products/${product.id}.json');
+      final url =
+          Uri.parse('${AppConstants.BASE_API_URL}/products/${product.id}.json');
       final response = await http.delete(url);
 
       if (response.statusCode >= 400) {
@@ -122,7 +123,8 @@ class ProductsProvider with ChangeNotifier {
     product.isFavorite = !product.isFavorite;
     notifyListeners();
 
-    final url = Uri.parse('$_baseUrl/products/${product.id}.json');
+    final url =
+        Uri.parse('${AppConstants.BASE_API_URL}/products/${product.id}.json');
     final response = await http.patch(
       url,
       body: json.encode({
