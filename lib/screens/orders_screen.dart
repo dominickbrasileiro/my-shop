@@ -4,7 +4,28 @@ import 'package:fshop/widgets/app_drawer.dart';
 import 'package:fshop/widgets/order_item_widget.dart';
 import 'package:provider/provider.dart';
 
-class OrdersScreen extends StatelessWidget {
+class OrdersScreen extends StatefulWidget {
+  @override
+  _OrdersScreenState createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends State<OrdersScreen> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrders().then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
+
+  Future<void> _fetchOrders() async {
+    await Provider.of<OrdersProvider>(context, listen: false).fetchOrders();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ordersProvider = Provider.of<OrdersProvider>(context);
@@ -15,12 +36,16 @@ class OrdersScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('My Orders'),
       ),
-      body: ListView.builder(
-        itemCount: ordersProvider.itemCount,
-        itemBuilder: (ctx, i) => OrderItemWidget(
-          order: orders[i],
-        ),
-      ),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: ordersProvider.itemCount,
+              itemBuilder: (ctx, i) => OrderItemWidget(
+                order: orders[i],
+              ),
+            ),
     );
   }
 }

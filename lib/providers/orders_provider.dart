@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fshop/models/cart_item.dart';
@@ -14,6 +13,40 @@ class OrdersProvider with ChangeNotifier {
   List<Order> get orders => [..._items];
 
   int get itemCount => _items.length;
+
+  Future<void> fetchOrders() async {
+    final url = Uri.parse('$_baseUrl/orders.json');
+    final response = await http.get(url);
+
+    Map<String, dynamic>? data = json.decode(response.body);
+
+    if (data != null) {
+      _items.clear();
+
+      data.forEach((id, orderData) {
+        _items.insert(
+            0,
+            Order(
+              id: id,
+              amount: orderData['amount'],
+              date: DateTime.parse(orderData['date']),
+              items: (orderData['items'] as List<dynamic>)
+                  .map(
+                    (item) => CartItem(
+                      id: item['id'],
+                      productId: item['productId'],
+                      title: item['title'],
+                      quantity: item['quantity'],
+                      price: item['price'],
+                    ),
+                  )
+                  .toList(),
+            ));
+      });
+
+      notifyListeners();
+    }
+  }
 
   Future<void> addOrder(List<CartItem> items, double amount) async {
     final date = DateTime.now();
