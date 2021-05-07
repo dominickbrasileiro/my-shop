@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/core/app_routes.dart';
+import 'package:fshop/core/exceptions/http_exception.dart';
 import 'package:fshop/models/product.dart';
 import 'package:fshop/providers/products_provider.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,8 @@ class ManageProductItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     return ListTile(
       leading: CircleAvatar(
         backgroundImage: NetworkImage(product.imageUrl),
@@ -60,7 +63,13 @@ class ManageProductItemWidget extends StatelessWidget {
                   final productsProvider =
                       Provider.of<ProductsProvider>(context, listen: false);
 
-                  productsProvider.deleteProduct(product.id);
+                  try {
+                    await productsProvider.deleteProduct(product.id);
+                  } on HttpException catch (e) {
+                    scaffoldMessenger.showSnackBar(SnackBar(
+                      content: Text('$e'),
+                    ));
+                  }
                 }
               },
               color: Theme.of(context).errorColor,

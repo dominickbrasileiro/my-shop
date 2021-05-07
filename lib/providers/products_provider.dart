@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fshop/core/exceptions/http_exception.dart';
 import 'package:fshop/models/partial_product.dart';
 import 'package:fshop/models/product.dart';
 import 'package:http/http.dart' as http;
@@ -95,12 +96,24 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
     final index = _items.indexWhere((product) => product.id == id);
 
     if (index >= 0) {
+      final product = _items[index];
+
       _items.removeWhere((product) => product.id == id);
       notifyListeners();
+
+      final url = Uri.parse('$_baseUrl/products/${product.id}.json');
+      final response = await http.delete(url);
+
+      if (response.statusCode >= 400) {
+        _items.insert(index, product);
+        notifyListeners();
+
+        throw HttpException('An unexpected error ocurred.');
+      }
     }
   }
 
