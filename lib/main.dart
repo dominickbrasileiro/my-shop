@@ -4,6 +4,7 @@ import 'package:fshop/providers/auth_provider.dart';
 import 'package:fshop/providers/cart_provider.dart';
 import 'package:fshop/providers/orders_provider.dart';
 import 'package:fshop/providers/products_provider.dart';
+import 'package:fshop/screens/auth_or_home_screen.dart';
 import 'package:fshop/screens/auth_screen.dart';
 import 'package:fshop/screens/cart_screen.dart';
 import 'package:fshop/screens/manage_products_screen.dart';
@@ -41,10 +42,9 @@ class MyApp extends StatelessWidget {
           accentColor: Colors.deepOrange,
           fontFamily: 'Lato',
         ),
-        initialRoute: AppRoutes.AUTH,
+        initialRoute: AppRoutes.AUTH_OR_HOME_SCREEN,
         routes: {
-          AppRoutes.AUTH: (ctx) => AuthScreen(),
-          AppRoutes.HOME: (ctx) => ProductsOverviewScreen(),
+          AppRoutes.AUTH_OR_HOME_SCREEN: (ctx) => AuthOrHomeScreen(),
           AppRoutes.PRODUCT_DETAILS: (ctx) => ProductDetailsScreen(),
           AppRoutes.CART: (ctx) => CartScreen(),
           AppRoutes.ORDERS: (ctx) => OrdersScreen(),

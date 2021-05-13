@@ -5,6 +5,23 @@ import 'package:fshop/core/exceptions/auth_exception.dart';
 import 'package:http/http.dart' as http;
 
 class AuthProvider with ChangeNotifier {
+  String? _token;
+  DateTime? _expirationDate;
+
+  bool get isAuthenticated {
+    return token != null;
+  }
+
+  String? get token {
+    if (_token != null &&
+        _expirationDate != null &&
+        _expirationDate!.isAfter(DateTime.now())) {
+      return _token;
+    } else {
+      return null;
+    }
+  }
+
   Future<void> _sendRequest(
     String email,
     String password,
@@ -28,6 +45,13 @@ class AuthProvider with ChangeNotifier {
     if (responseBody['error'] != null) {
       throw AuthException(responseBody['error']['message']);
     }
+
+    _token = responseBody['idToken'];
+    _expirationDate = DateTime.now().add(
+      Duration(seconds: int.parse(responseBody['expiresIn'])),
+    );
+
+    notifyListeners();
   }
 
   Future<void> login(String email, String password) async {
