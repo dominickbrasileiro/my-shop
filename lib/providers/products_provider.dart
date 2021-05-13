@@ -8,23 +8,30 @@ import 'package:fshop/models/product.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  List<Product> _items = [];
+  List<Product> items = [];
+  late String? token;
 
-  List<Product> get products => [..._items];
+  ProductsProvider({
+    required this.items,
+    this.token,
+  });
 
-  int get itemCount => _items.length;
+  List<Product> get products => [...items];
+
+  int get itemCount => items.length;
 
   Future<void> fetchProducts() async {
-    final url = Uri.parse('${AppConstants.BASE_API_URL}/products.json');
+    final url =
+        Uri.parse('${AppConstants.BASE_API_URL}/products.json?auth=$token');
     final response = await http.get(url);
 
     Map<String, dynamic>? data = json.decode(response.body);
 
     if (data != null) {
-      _items.clear();
+      items.clear();
 
       data.forEach((id, productData) {
-        _items.add(Product(
+        items.add(Product(
           id: id,
           title: productData['title'],
           price: productData['price'],
@@ -39,10 +46,11 @@ class ProductsProvider with ChangeNotifier {
   }
 
   List<Product> get favoriteProducts =>
-      _items.where((product) => product.isFavorite).toList();
+      items.where((product) => product.isFavorite).toList();
 
   Future<void> addProduct(PartialProduct partialProduct) async {
-    final url = Uri.parse('${AppConstants.BASE_API_URL}/products.json');
+    final url =
+        Uri.parse('${AppConstants.BASE_API_URL}/products.json?auth=$token');
     final response = await http.post(
       url,
       body: json.encode({
@@ -56,7 +64,7 @@ class ProductsProvider with ChangeNotifier {
 
     final id = json.decode(response.body)['name'];
 
-    _items.add(Product(
+    items.add(Product(
       id: id,
       title: partialProduct.title,
       price: partialProduct.price,
@@ -70,14 +78,14 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> updateProduct(Product product) async {
     final productIndex =
-        _items.indexWhere((_product) => _product.id == product.id);
+        items.indexWhere((_product) => _product.id == product.id);
 
     if (productIndex < 0) {
       return;
     }
 
-    final url =
-        Uri.parse('${AppConstants.BASE_API_URL}/products/${product.id}.json');
+    final url = Uri.parse(
+        '${AppConstants.BASE_API_URL}/products/${product.id}.json?auth=$token');
     final response = await http.patch(
       url,
       body: json.encode({
@@ -92,25 +100,25 @@ class ProductsProvider with ChangeNotifier {
       throw new HttpException();
     }
 
-    _items[productIndex] = product;
+    items[productIndex] = product;
     notifyListeners();
   }
 
   Future<void> deleteProduct(String id) async {
-    final index = _items.indexWhere((product) => product.id == id);
+    final index = items.indexWhere((product) => product.id == id);
 
     if (index >= 0) {
-      final product = _items[index];
+      final product = items[index];
 
-      _items.removeWhere((product) => product.id == id);
+      items.removeWhere((product) => product.id == id);
       notifyListeners();
 
-      final url =
-          Uri.parse('${AppConstants.BASE_API_URL}/products/${product.id}.json');
+      final url = Uri.parse(
+          '${AppConstants.BASE_API_URL}/products/${product.id}.json?auth=$token');
       final response = await http.delete(url);
 
       if (response.statusCode >= 400) {
-        _items.insert(index, product);
+        items.insert(index, product);
         notifyListeners();
 
         throw HttpException();
@@ -119,12 +127,12 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> toggleFavoriteById(String id) async {
-    final product = _items.firstWhere((product) => product.id == id);
+    final product = items.firstWhere((product) => product.id == id);
     product.isFavorite = !product.isFavorite;
     notifyListeners();
 
-    final url =
-        Uri.parse('${AppConstants.BASE_API_URL}/products/${product.id}.json');
+    final url = Uri.parse(
+        '${AppConstants.BASE_API_URL}/products/${product.id}.json?auth=$token');
     final response = await http.patch(
       url,
       body: json.encode({

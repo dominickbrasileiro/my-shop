@@ -7,23 +7,30 @@ import 'package:fshop/models/order.dart';
 import 'package:http/http.dart' as http;
 
 class OrdersProvider with ChangeNotifier {
-  List<Order> _items = [];
+  List<Order> items = [];
+  late String? token;
 
-  List<Order> get orders => [..._items];
+  OrdersProvider({
+    required this.items,
+    this.token,
+  });
 
-  int get itemCount => _items.length;
+  List<Order> get orders => [...items];
+
+  int get itemCount => items.length;
 
   Future<void> fetchOrders() async {
-    final url = Uri.parse('${AppConstants.BASE_API_URL}/orders.json');
+    final url =
+        Uri.parse('${AppConstants.BASE_API_URL}/orders.json?auth=$token');
     final response = await http.get(url);
 
     Map<String, dynamic>? data = json.decode(response.body);
 
     if (data != null) {
-      _items.clear();
+      items.clear();
 
       data.forEach((id, orderData) {
-        _items.insert(
+        items.insert(
             0,
             Order(
               id: id,
@@ -47,16 +54,17 @@ class OrdersProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addOrder(List<CartItem> items, double amount) async {
+  Future<void> addOrder(List<CartItem> cartItems, double amount) async {
     final date = DateTime.now();
 
-    final url = Uri.parse('${AppConstants.BASE_API_URL}/orders.json');
+    final url =
+        Uri.parse('${AppConstants.BASE_API_URL}/orders.json?auth=$token');
     final response = await http.post(
       url,
       body: json.encode({
         'amount': amount,
         'date': date.toIso8601String(),
-        'items': items
+        'items': cartItems
             .map((cartItem) => {
                   'id': cartItem.id,
                   'productId': cartItem.productId,
@@ -70,12 +78,12 @@ class OrdersProvider with ChangeNotifier {
 
     final id = json.decode(response.body)['name'];
 
-    _items.insert(
+    items.insert(
         0,
         Order(
           id: id,
           amount: amount,
-          items: items,
+          items: cartItems,
           date: date,
         ));
 
