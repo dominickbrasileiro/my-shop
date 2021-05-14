@@ -10,10 +10,12 @@ import 'package:http/http.dart' as http;
 class ProductsProvider with ChangeNotifier {
   List<Product> items = [];
   late String? token;
+  late String? userId;
 
   ProductsProvider({
     required this.items,
     this.token,
+    this.userId,
   });
 
   List<Product> get products => [...items];
@@ -21,23 +23,30 @@ class ProductsProvider with ChangeNotifier {
   int get itemCount => items.length;
 
   Future<void> fetchProducts() async {
-    final url =
+    final productsUrl =
         Uri.parse('${AppConstants.BASE_API_URL}/products.json?auth=$token');
-    final response = await http.get(url);
+    final productsResponse = await http.get(productsUrl);
+    Map<String, dynamic>? productsData = json.decode(productsResponse.body);
 
-    Map<String, dynamic>? data = json.decode(response.body);
+    final favoritesUrl = Uri.parse(
+        '${AppConstants.BASE_API_URL}/userFavorites/$userId.json?auth=$token');
+    final favoritesResponse = await http.get(favoritesUrl);
+    Map<String, dynamic>? favoritesData = json.decode(favoritesResponse.body);
 
-    if (data != null) {
+    if (productsData != null) {
       items.clear();
 
-      data.forEach((id, productData) {
+      productsData.forEach((id, productData) {
+        final isFavorite =
+            favoritesData == null ? false : favoritesData[id] ?? false;
+
         items.add(Product(
           id: id,
           title: productData['title'],
           price: productData['price'],
           description: productData['description'],
           imageUrl: productData['imageUrl'],
-          isFavorite: productData['isFavorite'],
+          isFavorite: isFavorite,
         ));
       });
 
@@ -58,7 +67,6 @@ class ProductsProvider with ChangeNotifier {
         'description': partialProduct.description,
         'price': partialProduct.price,
         'imageUrl': partialProduct.imageUrl,
-        'isFavorite': partialProduct.isFavorite,
       }),
     );
 
@@ -70,7 +78,6 @@ class ProductsProvider with ChangeNotifier {
       price: partialProduct.price,
       description: partialProduct.description,
       imageUrl: partialProduct.imageUrl,
-      isFavorite: partialProduct.isFavorite,
     ));
 
     notifyListeners();
@@ -132,12 +139,10 @@ class ProductsProvider with ChangeNotifier {
     notifyListeners();
 
     final url = Uri.parse(
-        '${AppConstants.BASE_API_URL}/products/${product.id}.json?auth=$token');
-    final response = await http.patch(
+        '${AppConstants.BASE_API_URL}/userFavorites/$userId/${product.id}.json?auth=$token');
+    final response = await http.put(
       url,
-      body: json.encode({
-        'isFavorite': product.isFavorite,
-      }),
+      body: json.encode(product.isFavorite),
     );
 
     if (response.statusCode >= 400) {

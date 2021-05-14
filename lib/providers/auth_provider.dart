@@ -5,11 +5,16 @@ import 'package:fshop/core/exceptions/auth_exception.dart';
 import 'package:http/http.dart' as http;
 
 class AuthProvider with ChangeNotifier {
+  String? _userId;
   String? _token;
   DateTime? _expirationDate;
 
   bool get isAuthenticated {
     return token != null;
+  }
+
+  String? get userId {
+    return isAuthenticated ? _userId : null;
   }
 
   String? get token {
@@ -46,6 +51,7 @@ class AuthProvider with ChangeNotifier {
       throw AuthException(responseBody['error']['message']);
     }
 
+    _userId = responseBody['localId'];
     _token = responseBody['idToken'];
     _expirationDate = DateTime.now().add(
       Duration(seconds: int.parse(responseBody['expiresIn'])),
