@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fshop/core/app_routes.dart';
+import 'package:fshop/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -35,6 +37,14 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(AppRoutes.MANAGE_PRODUCTS);
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.exit_to_app),
+            title: Text('Sair'),
+            onTap: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
             },
           ),
         ],
