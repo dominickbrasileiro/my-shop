@@ -9,10 +9,12 @@ import 'package:http/http.dart' as http;
 class OrdersProvider with ChangeNotifier {
   List<Order> items = [];
   late String? token;
+  late String? userId;
 
   OrdersProvider({
     required this.items,
     this.token,
+    this.userId,
   });
 
   List<Order> get orders => [...items];
@@ -20,8 +22,8 @@ class OrdersProvider with ChangeNotifier {
   int get itemCount => items.length;
 
   Future<void> fetchOrders() async {
-    final url =
-        Uri.parse('${AppConstants.BASE_API_URL}/orders.json?auth=$token');
+    final url = Uri.parse(
+        '${AppConstants.BASE_API_URL}/userOrders/$userId.json?auth=$token');
     final response = await http.get(url);
 
     Map<String, dynamic>? data = json.decode(response.body);
@@ -57,8 +59,8 @@ class OrdersProvider with ChangeNotifier {
   Future<void> addOrder(List<CartItem> cartItems, double amount) async {
     final date = DateTime.now();
 
-    final url =
-        Uri.parse('${AppConstants.BASE_API_URL}/orders.json?auth=$token');
+    final url = Uri.parse(
+        '${AppConstants.BASE_API_URL}/userOrders/$userId.json?auth=$token');
     final response = await http.post(
       url,
       body: json.encode({
