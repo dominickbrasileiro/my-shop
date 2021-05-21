@@ -28,6 +28,7 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
 
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -44,6 +45,16 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
     _opacityAnimation = Tween(
       begin: 0.0,
       end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.linear,
+      ),
+    );
+
+    _slideAnimation = Tween(
+      begin: Offset(0, -1.5),
+      end: Offset(0, 0),
     ).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -191,20 +202,23 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
                 ),
                 child: FadeTransition(
                   opacity: _opacityAnimation,
-                  child: TextFormField(
-                    decoration:
-                        InputDecoration(labelText: 'Password Confirmation'),
-                    keyboardType: TextInputType.emailAddress,
-                    obscureText: true,
-                    validator: _authMode == AuthMode.Register
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords does not match';
-                            }
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: TextFormField(
+                      decoration:
+                          InputDecoration(labelText: 'Password Confirmation'),
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: true,
+                      validator: _authMode == AuthMode.Register
+                          ? (value) {
+                              if (value != _passwordController.text) {
+                                return 'Passwords does not match';
+                              }
 
-                            return null;
-                          }
-                        : null,
+                              return null;
+                            }
+                          : null,
+                    ),
                   ),
                 ),
               ),
