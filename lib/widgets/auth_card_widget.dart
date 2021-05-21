@@ -139,10 +139,14 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Container(
-        height: _heightAnimation.value.height,
-        width: screenSize.width * 0.75,
-        padding: EdgeInsets.all(16),
+      child: AnimatedBuilder(
+        animation: _heightAnimation,
+        builder: (ctx, ch) => Container(
+          height: _heightAnimation.value.height,
+          width: screenSize.width * 0.75,
+          padding: EdgeInsets.all(16),
+          child: ch,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
