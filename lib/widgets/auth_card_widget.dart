@@ -13,8 +13,7 @@ class AuthCardWidget extends StatefulWidget {
   _AuthCardWidgetState createState() => _AuthCardWidgetState();
 }
 
-class _AuthCardWidgetState extends State<AuthCardWidget>
-    with SingleTickerProviderStateMixin {
+class _AuthCardWidgetState extends State<AuthCardWidget> {
   bool _isLoading = false;
   AuthMode _authMode = AuthMode.Login;
   late TextEditingController _passwordController;
@@ -26,39 +25,14 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
     'password': '',
   };
 
-  late AnimationController _animationController;
-  late Animation<Size> _heightAnimation;
-
   @override
   void initState() {
     super.initState();
     _passwordController = TextEditingController();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(
-        milliseconds: 300,
-      ),
-    );
-
-    _heightAnimation = Tween(
-      begin: Size(double.infinity, 310),
-      end: Size(double.infinity, 380),
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.linear,
-      ),
-    );
-
-    _heightAnimation.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -122,10 +96,8 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
     setState(() {
       if (_authMode == AuthMode.Login) {
         _authMode = AuthMode.Register;
-        _animationController.forward();
       } else {
         _authMode = AuthMode.Login;
-        _animationController.reverse();
       }
     });
   }
@@ -139,14 +111,12 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: AnimatedBuilder(
-        animation: _heightAnimation,
-        builder: (ctx, ch) => Container(
-          height: _heightAnimation.value.height,
-          width: screenSize.width * 0.75,
-          padding: EdgeInsets.all(16),
-          child: ch,
-        ),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.linear,
+        height: _authMode == AuthMode.Login ? 310 : 380,
+        width: screenSize.width * 0.75,
+        padding: EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
