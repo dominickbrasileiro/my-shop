@@ -13,7 +13,8 @@ class AuthCardWidget extends StatefulWidget {
   _AuthCardWidgetState createState() => _AuthCardWidgetState();
 }
 
-class _AuthCardWidgetState extends State<AuthCardWidget> {
+class _AuthCardWidgetState extends State<AuthCardWidget>
+    with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   AuthMode _authMode = AuthMode.Login;
   late TextEditingController _passwordController;
@@ -25,14 +26,39 @@ class _AuthCardWidgetState extends State<AuthCardWidget> {
     'password': '',
   };
 
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
+
   @override
   void initState() {
     super.initState();
     _passwordController = TextEditingController();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(
+        milliseconds: 300,
+      ),
+    );
+
+    _opacityAnimation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.linear,
+      ),
+    );
+
+    _opacityAnimation.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -96,8 +122,10 @@ class _AuthCardWidgetState extends State<AuthCardWidget> {
     setState(() {
       if (_authMode == AuthMode.Login) {
         _authMode = AuthMode.Register;
+        _animationController.forward();
       } else {
         _authMode = AuthMode.Login;
+        _animationController.reverse();
       }
     });
   }
@@ -155,22 +183,31 @@ class _AuthCardWidgetState extends State<AuthCardWidget> {
                 },
                 onSaved: (value) => _authFormData['password'] = value!,
               ),
-              if (_authMode == AuthMode.Register)
-                TextFormField(
-                  decoration:
-                      InputDecoration(labelText: 'Password Confirmation'),
-                  keyboardType: TextInputType.emailAddress,
-                  obscureText: true,
-                  validator: _authMode == AuthMode.Register
-                      ? (value) {
-                          if (value != _passwordController.text) {
-                            return 'Passwords does not match';
-                          }
-
-                          return null;
-                        }
-                      : null,
+              AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.linear,
+                constraints: BoxConstraints(
+                  maxHeight: _authMode == AuthMode.Register ? 100 : 0,
                 ),
+                child: FadeTransition(
+                  opacity: _opacityAnimation,
+                  child: TextFormField(
+                    decoration:
+                        InputDecoration(labelText: 'Password Confirmation'),
+                    keyboardType: TextInputType.emailAddress,
+                    obscureText: true,
+                    validator: _authMode == AuthMode.Register
+                        ? (value) {
+                            if (value != _passwordController.text) {
+                              return 'Passwords does not match';
+                            }
+
+                            return null;
+                          }
+                        : null,
+                  ),
+                ),
+              ),
               Expanded(child: Container()),
               if (_isLoading)
                 Container(
