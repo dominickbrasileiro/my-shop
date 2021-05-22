@@ -18,6 +18,7 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
   bool _isLoading = false;
   AuthMode _authMode = AuthMode.Login;
   late TextEditingController _passwordController;
+  late FocusNode _passwordFocusNode;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -34,6 +35,7 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
   void initState() {
     super.initState();
     _passwordController = TextEditingController();
+    _passwordFocusNode = FocusNode();
 
     _animationController = AnimationController(
       vsync: this,
@@ -163,6 +165,7 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
               TextFormField(
                 decoration: InputDecoration(labelText: 'E-mail'),
                 keyboardType: TextInputType.emailAddress,
+                onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'E-mail is required';
@@ -178,9 +181,11 @@ class _AuthCardWidgetState extends State<AuthCardWidget>
               ),
               TextFormField(
                 controller: _passwordController,
+                focusNode: _passwordFocusNode,
                 decoration: InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 keyboardType: TextInputType.emailAddress,
+                onFieldSubmitted: (_) => _submit(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Password is required';
