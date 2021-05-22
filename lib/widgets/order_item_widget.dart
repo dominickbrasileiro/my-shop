@@ -18,31 +18,36 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Column(
-        children: [
-          ListTile(
-            title: Text('\$${widget.order.amount}'),
-            subtitle: Text(
-              DateFormat.yMMMEd().format(widget.order.date),
+    final double itemsHeight = widget.order.items.length * 25 + 10;
+
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      height: expanded ? itemsHeight + 92 : 92,
+      child: Card(
+        margin: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text('\$${widget.order.amount}'),
+              subtitle: Text(
+                DateFormat.yMMMEd().format(widget.order.date),
+              ),
+              trailing: IconButton(
+                icon: Icon(expanded ? Icons.expand_less : Icons.expand_more),
+                onPressed: () {
+                  setState(() {
+                    expanded = !expanded;
+                  });
+                },
+              ),
             ),
-            trailing: IconButton(
-              icon: Icon(expanded ? Icons.expand_less : Icons.expand_more),
-              onPressed: () {
-                setState(() {
-                  expanded = !expanded;
-                });
-              },
-            ),
-          ),
-          if (expanded)
-            Container(
+            AnimatedContainer(
+              duration: Duration(milliseconds: 200),
+              height: expanded ? itemsHeight : 0,
               padding: EdgeInsets.symmetric(
                 horizontal: 15,
                 vertical: 4,
               ),
-              height: widget.order.items.length * 25 + 10,
               child: ListView(
                 children: widget.order.items.map((item) {
                   return Row(
@@ -67,7 +72,8 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
                 }).toList(),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
